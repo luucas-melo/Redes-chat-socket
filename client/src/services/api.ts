@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
 });
 
 const errorResponseHandler = (error: {
@@ -12,8 +11,6 @@ const errorResponseHandler = (error: {
 }) => {
   if (error?.response) {
     if (typeof error?.response?.data === 'string') {
-      if (error.response.data.includes('named cookie not present')) return Promise.reject(new Error('Session expired'));
-
       return Promise.reject(new Error(error.response.data));
     }
 

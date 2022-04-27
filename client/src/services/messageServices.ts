@@ -7,10 +7,11 @@ export interface IMessage {
 }
 export const addNewMessage = async (message: IMessage) => {
   try {
-    const response = await api.post('/messages/add-new-nessage', message);
+    const response = await api.post<IMessage['message']>('/messages/add-new-message', message);
 
-    return response.data;
+    return response;
   } catch (error) {
     console.log(error);
+    return error;
   }
 };
