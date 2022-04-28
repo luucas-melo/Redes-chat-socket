@@ -3,7 +3,7 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 
 export type ChatContextType = {
   chat: string[];
-  setChat: React.Dispatch<React.SetStateAction<never[]>>;
+  setChat: React.Dispatch<React.SetStateAction<string[]>>;
   connected: boolean;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -24,7 +24,7 @@ interface ChartProviderProps {
 }
 export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
-  const [chat, setChat] = useState([]);
+  const [chat, setChat] = useState<string[]>([]);
 
   const values = useMemo(
     () => ({
@@ -43,7 +43,7 @@ export function useChat() {
   const context = useContext(ChatContext);
 
   if (!context) {
-    throw new Error('useChat must be used within a ChartProvider');
+    throw new Error('useChat must be used within a ChatProvider');
   }
 
   return context;

@@ -9,11 +9,17 @@ export const Chat = ({ session }: { session: Session }) => {
   const { handleSubmit, register, reset } = useForm<IMessage>();
 
   const socket = useRef();
-  const { chat, connected } = useChat();
+  const { chat, connected, setChat } = useChat();
   const onSubmit = async (data: IMessage) => {
     try {
-      const response = await addNewMessage({ message: 'DAS', from: 'teasd', to: 'to' });
-
+      socket.current.emit('SEND_MSG', {
+        to: 'Marcos',
+        from: 'luucas-melo',
+        message: data.message,
+      });
+      const response = await addNewMessage({ message: 'teste', from: 'luucas-melo', to: 'luucas-melo' });
+      chat.push(data.message);
+      setChat([...chat]);
       return response?.data;
     } catch (error) {
       console.log(error);
@@ -23,9 +29,22 @@ export const Chat = ({ session }: { session: Session }) => {
   };
 
   useEffect(() => {
-    socket.current = io('http://localhost:5000');
-    socket.current.emit('ADD_USER', 'luucas-melo');
+    console.log(session?.user);
+    if (session?.user?.login) {
+      socket.current = io('http://localhost:5000');
+      socket.current.emit('ADD_USER', session?.user?.login);
+    }
+  }, [session?.user?.login]);
+
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on('RECEIVE_MSG', (msg: string) => {
+        chat.push(msg);
+        setChat([...chat]);
+      });
+    }
   }, []);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Flex flexDirection="column" background="gray.50" maxH="100vh" height="calc(100% - 40px)" overflowY="scroll">
@@ -41,7 +60,7 @@ export const Chat = ({ session }: { session: Session }) => {
                   borderRadius="md"
                   padding="1"
                 >
-                  {message.msg}
+                  {message}
                 </Text>
               </Flex>
             </Flex>
