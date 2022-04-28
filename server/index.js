@@ -5,22 +5,19 @@ const app = express();
 const socket = require('socket.io');
 require('dotenv').config();
 
-app.use(
-  cors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  })
-);
+const corsConfig = {
+  origin: 'http://localhost:3000',
+  credentials: true,
+};
+
+app.use(cors(corsConfig));
 app.use(express.json());
 
 app.use('/api/messages', messageRoutes);
 
 const server = app.listen(process.env.PORT, () => console.log(`Server started on ${process.env.PORT}`));
 const io = socket(server, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
+  cors: corsConfig,
 });
 
 global.onlineUsers = new Map();
@@ -33,7 +30,7 @@ io.on('connection', (socket) => {
   socket.on('SEND_MSG', (data) => {
     const sendUserSocket = onlineUsers.get(data.to);
     if (sendUserSocket) {
-      socket.to(sendUserSocket).emit('RECEIVE_MSG', data.msg);
+      socket.to(sendUserSocket).emit('RECEIVE_MSG', data.message);
     }
   });
 });
