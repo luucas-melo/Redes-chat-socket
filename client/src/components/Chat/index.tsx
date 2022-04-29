@@ -1,4 +1,4 @@
-import { Flex, Input, Text } from '@chakra-ui/react';
+import { Avatar, Flex, Input, Text, WrapItem } from '@chakra-ui/react';
 import { Session } from 'next-auth';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,7 +9,7 @@ export const Chat = ({ session }: { session: Session }) => {
   const { handleSubmit, register, reset } = useForm<IMessage>();
 
   const socket = useRef();
-  const { chat, connected, setChat, currentChat } = useChat();
+  const { chat, connected, setConnected, setChat, currentChat } = useChat();
 
   const onSubmit = async (data: IMessage) => {
     if (!currentChat) return;
@@ -40,6 +40,7 @@ export const Chat = ({ session }: { session: Session }) => {
     if (session?.user?.login) {
       socket.current = io('http://localhost:5000');
       socket.current.emit('ADD_USER', session?.user?.login);
+      setConnected(true);
     }
   }, [session?.user?.login]);
 
@@ -56,6 +57,19 @@ export const Chat = ({ session }: { session: Session }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Flex flexDirection="column" background="gray.50" maxH="100vh" height="calc(100% - 40px)" overflowY="scroll">
+        {currentChat && (
+          <>
+            <Flex borderBottomWidth="1px" padding={4} alignItems="center" gap="1rem" cursor="pointer">
+              <Avatar name="usuário logado" src={currentChat?.avatar_url} />
+              <Flex flexDirection="column">
+                <Text fontWeight="semibold">{currentChat?.login}</Text>
+                <Text fontSize="small" fontWeight="light">
+                  status
+                </Text>
+              </Flex>
+            </Flex>
+          </>
+        )}
         {chat.map((chatData, index) => {
           console.log(session?.user?.login, chatData);
 
