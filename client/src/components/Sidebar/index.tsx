@@ -8,7 +8,6 @@ interface SidebarProps {
 export const Sidebar = ({ session, following }: SidebarProps) => {
   const { setCurrentChat, currentChat, chat } = useChat();
 
-  console.log(chat, currentChat);
   return (
     <Flex width="100%" flexDirection="column" overflowY="scroll">
       <Flex bg="white" height="fit-content" width="100%" padding="3" justify="space-between" alignItems="center">

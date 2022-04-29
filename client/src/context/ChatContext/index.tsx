@@ -3,10 +3,10 @@ import { Session } from 'next-auth';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
 export type ChatContextType = {
-  chat: string[];
+  chat: IChat[];
   currentChat: IUser | null;
   setCurrentChat: React.Dispatch<React.SetStateAction<IUser | null>>;
-  setChat: React.Dispatch<React.SetStateAction<string[]>>;
+  setChat: React.Dispatch<React.SetStateAction<IChat[]>>;
   connected: boolean;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -29,7 +29,7 @@ interface ChartProviderProps {
 }
 export const ChartProvider = ({ children }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
-  const [chat, setChat] = useState<string[]>([]);
+  const [chat, setChat] = useState<IChat[]>([]);
   const [currentChat, setCurrentChat] = useState<IUser | null>(null);
 
   const values = useMemo(

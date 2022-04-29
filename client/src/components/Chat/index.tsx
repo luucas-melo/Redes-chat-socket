@@ -15,16 +15,18 @@ export const Chat = ({ session }: { session: Session }) => {
     if (!currentChat) return;
     try {
       socket.current.emit('SEND_MSG', {
-        to: currentChat?.login,
         from: session.user.login,
+        to: currentChat?.login,
         message: data.message,
       });
-      const response = await addNewMessage({
+
+      const messageObject = {
         message: data.message,
         from: session?.user?.login,
         to: currentChat?.login,
-      });
-      chat.push(data.message);
+      };
+      const response = await addNewMessage(messageObject);
+      chat.push(messageObject);
       setChat([...chat]);
       return response?.data;
     } catch (error) {
@@ -35,7 +37,6 @@ export const Chat = ({ session }: { session: Session }) => {
   };
 
   useEffect(() => {
-    console.log(session?.user);
     if (session?.user?.login) {
       socket.current = io('http://localhost:5000');
       socket.current.emit('ADD_USER', session?.user?.login);
@@ -44,7 +45,8 @@ export const Chat = ({ session }: { session: Session }) => {
 
   useEffect(() => {
     if (socket.current) {
-      socket.current.on('RECEIVE_MSG', (msg: string) => {
+      socket.current.on('RECEIVE_MSG', (msg: IChat) => {
+        console.log('MEE', msg);
         chat.push(msg);
         setChat([...chat]);
       });
@@ -54,19 +56,20 @@ export const Chat = ({ session }: { session: Session }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Flex flexDirection="column" background="gray.50" maxH="100vh" height="calc(100% - 40px)" overflowY="scroll">
-        {chat.map((message, index) => {
+        {chat.map((chatData, index) => {
+          console.log(session?.user?.login, chatData);
+
           return (
             <Flex flexDirection="column" key={index} padding="10" paddingTop="0">
-              <Flex flexDirection="column" marginLeft={session?.user?.login === message.user ? 'auto' : '0'}>
-                {session?.user?.login !== message.user && <Text fontSize="smaller">{message.user}</Text>}
+              <Flex flexDirection="column" marginLeft={session?.user?.login === chatData.from ? 'auto' : '0'}>
                 <Text
                   minWidth="50px"
-                  bg={session?.user?.login === message.user ? 'whatsapp.100' : 'white'}
+                  bg={session?.user?.login === chatData.from ? 'whatsapp.100' : 'white'}
                   width="fit-content"
                   borderRadius="md"
                   padding="1"
                 >
-                  {message}
+                  {chatData.message}
                 </Text>
               </Flex>
             </Flex>
