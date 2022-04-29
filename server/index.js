@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
   socket.on('SEND_MSG', (data) => {
     const sendUserSocket = onlineUsers.get(data.to);
     if (sendUserSocket) {
-      socket.to(sendUserSocket).emit('RECEIVE_MSG', data.message);
+      socket.to(sendUserSocket).emit('RECEIVE_MSG', data);
     }
   });
 });

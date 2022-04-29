@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SessionProvider } from 'next-auth/react';
 import { ChartProvider } from '../context/ChatContext';
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: { Component: any; pageProps: any }) {
   return (
     <ChakraProvider>
       <CSSReset />
@@ -18,7 +18,7 @@ function MyApp({ Component, pageProps }) {
         draggable
         pauseOnHover
       />
-      <SessionProvider>
+      <SessionProvider session={pageProps.session}>
         <ChartProvider session={pageProps.session}>
           <Component {...pageProps} />
         </ChartProvider>

@@ -9,15 +9,21 @@ export const Chat = ({ session }: { session: Session }) => {
   const { handleSubmit, register, reset } = useForm<IMessage>();
 
   const socket = useRef();
-  const { chat, connected, setChat } = useChat();
+  const { chat, connected, setChat, currentChat } = useChat();
+
   const onSubmit = async (data: IMessage) => {
+    if (!currentChat) return;
     try {
       socket.current.emit('SEND_MSG', {
-        to: 'Marcos',
-        from: 'luucas-melo',
+        to: currentChat?.login,
+        from: session.user.login,
         message: data.message,
       });
-      const response = await addNewMessage({ message: 'teste', from: 'luucas-melo', to: 'luucas-melo' });
+      const response = await addNewMessage({
+        message: data.message,
+        from: session?.user?.login,
+        to: currentChat?.login,
+      });
       chat.push(data.message);
       setChat([...chat]);
       return response?.data;
