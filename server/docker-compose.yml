@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  chat-socket-backend:
+    build:
+      context: .
+    volumes:
+      - .:/app
+      - /app/node_modules/
+
+    # Expose ports [HOST:CONTAINER}
+    ports:
+      - '${PORT}:${PORT}'
+
+    # Set environment variables from this file
+    env_file:
+      - .env
+
+    # Overwrite any env var defined in .env file (if required)
+    environment:
+      - MONGO_HOST=mongodb://mongo/chat-socket-backend
+      - DEBUG=chat-socket-backend:*
+
+    # Link to containers in another service.
+    # Links also express dependency between services in the same way as depends_on,
+    # so they determine the order of service startup.
+    links:
+      - mongo
+    depends_on:
+      - mongo
+
+  mongo:
+    image: 'mongo:5.0.6'
+    ports:
+      - '${MONGO_PORT}:27017'

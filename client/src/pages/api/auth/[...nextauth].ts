@@ -20,7 +20,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
             // Any object returned will be saved in `user` property of the JWT4
 
             const response = await githubApi.get(`/users/${credentials?.username.toLocaleLowerCase()}`);
-            console.log('RESP', response.data);
             return response.data;
 
             // If you return null or false then the credentials will be rejected

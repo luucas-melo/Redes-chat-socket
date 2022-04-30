@@ -5,11 +5,14 @@ interface SidebarProps {
   session: Session;
   following: IUser[];
 }
-export const Sidebar = ({ following }: SidebarProps) => {
+export const Sidebar = ({ session, following }: SidebarProps) => {
   const { setCurrentChat } = useChat();
 
   return (
     <Flex width="100%" flexDirection="column" overflowY="scroll">
+      <Flex borderBottomWidth="1px" padding={4} alignItems="center" gap="1rem" cursor="pointer" bg="gray.100">
+        <Avatar name="following user" src={session?.user?.avatar_url} />
+      </Flex>
       {following?.length &&
         following.map((user, index) => (
           <Flex
