@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { api } from '../../../services/api';
 import { githubApi } from '../../../services/githubApi';
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
@@ -19,8 +20,15 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           try {
             // Any object returned will be saved in `user` property of the JWT4
 
-            const response = await githubApi.get(`/users/${credentials?.username.toLocaleLowerCase()}`);
-            return response.data;
+            const response = await githubApi.get<IUser>(`/users/${credentials?.username.toLocaleLowerCase()}`);
+
+            const userResponse = await api.post<{ user: MongoUser }>('/user/save', {
+              username: credentials?.username,
+              avatar_url: response.data.avatar_url,
+              name: response.data.name,
+            });
+
+            return userResponse.data.user;
 
             // If you return null or false then the credentials will be rejected
             // return null
@@ -43,7 +51,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       error: '/',
     },
     callbacks: {
-      async signIn({ user }: { user: IUser }) {
+      async signIn({ user }: { user: MongoUser }) {
         if (user) return true;
 
         return false;

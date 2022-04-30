@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 import { useChat } from '../../context/ChatContext';
 import { addNewMessage, IMessage } from '../../services/messageServices';
 export const Chat = ({ session }: { session: Session }) => {
+  console.log(session);
   const { handleSubmit, register, reset } = useForm<IMessage>();
 
   const socket = useRef();
@@ -15,15 +16,15 @@ export const Chat = ({ session }: { session: Session }) => {
     if (!currentChat) return;
     try {
       socket.current.emit('SEND_MSG', {
-        from: session.user.login,
-        to: currentChat?.login,
-        message: data.message,
+        from: session.user._id,
+        to: currentChat?._id,
+        message: data?.message,
       });
 
       const messageObject = {
         message: data.message,
-        from: session?.user?.login,
-        to: currentChat?.login,
+        from: session?.user?._id,
+        to: currentChat?._id,
       };
       const response = await addNewMessage(messageObject);
       chat.push(messageObject);
@@ -37,17 +38,16 @@ export const Chat = ({ session }: { session: Session }) => {
   };
 
   useEffect(() => {
-    if (session?.user?.login) {
+    if (session?.user?._id) {
       socket.current = io('http://localhost:5000');
-      socket.current.emit('ADD_USER', session?.user?.login);
+      socket.current.emit('ADD_USER', session?.user?._id);
       setConnected(true);
     }
-  }, [session?.user?.login]);
+  }, [session?.user?._id]);
 
   useEffect(() => {
     if (socket.current) {
       socket.current.on('RECEIVE_MSG', (msg: IChat) => {
-        console.log('MEE', msg);
         chat.push(msg);
         setChat([...chat]);
       });
@@ -62,7 +62,7 @@ export const Chat = ({ session }: { session: Session }) => {
             <Flex borderBottomWidth="1px" padding={4} alignItems="center" gap="1rem" cursor="pointer">
               <Avatar name="usuário logado" src={currentChat?.avatar_url} />
               <Flex flexDirection="column">
-                <Text fontWeight="semibold">{currentChat?.login}</Text>
+                <Text fontWeight="semibold">{currentChat?._id}</Text>
                 <Text fontSize="small" fontWeight="light">
                   status
                 </Text>
@@ -71,14 +71,14 @@ export const Chat = ({ session }: { session: Session }) => {
           </>
         )}
         {chat.map((chatData, index) => {
-          console.log(session?.user?.login, chatData);
+          console.log(session?.user?._id, chatData);
 
           return (
             <Flex flexDirection="column" key={index} padding="10" paddingTop="0">
-              <Flex flexDirection="column" marginLeft={session?.user?.login === chatData.from ? 'auto' : '0'}>
+              <Flex flexDirection="column" marginLeft={session?.user?._id === chatData.from ? 'auto' : '0'}>
                 <Text
                   minWidth="50px"
-                  bg={session?.user?.login === chatData.from ? 'whatsapp.100' : 'white'}
+                  bg={session?.user?._id === chatData.from ? 'whatsapp.100' : 'white'}
                   width="fit-content"
                   borderRadius="md"
                   padding="1"

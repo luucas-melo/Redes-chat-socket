@@ -1,10 +1,12 @@
 version: '2'
 
 services:
-  chat-socket-backend:
+  chat-backend:
     build:
       context: .
     volumes:
+      # Mounts the project directory on the host to /app inside the container,
+      # allowing you to modify the code without having to rebuild the image.
       - .:/app
       - /app/node_modules/
 
@@ -18,8 +20,8 @@ services:
 
     # Overwrite any env var defined in .env file (if required)
     environment:
-      - MONGO_HOST=mongodb://mongo/chat-socket-backend
-      - DEBUG=chat-socket-backend:*
+      - MONGO_HOST=mongodb://mongo/chat-backend
+      - DEBUG=chat-backend:*
 
     # Link to containers in another service.
     # Links also express dependency between services in the same way as depends_on,

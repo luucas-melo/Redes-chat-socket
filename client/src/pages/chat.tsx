@@ -9,7 +9,7 @@ import { githubApi } from '../services/githubApi';
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
     const session = await getSession(context);
-    const response = await githubApi.get<IUser[]>(`/users/${session.user.login}/following`);
+    const response = await githubApi.get<IUser[]>(`/users/${session.user.username}/following`);
 
     return {
       props: { session: session, following: response.data },
@@ -25,7 +25,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 interface ChatProps {
   session: Session;
-  following: IUser[];
+  following: MongoUser[];
 }
 const Chat = ({ session, following }: ChatProps) => {
   return (

@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const messageRoutes = require('./routes/messages');
+const userRoutes = require('./routes/user');
 const app = express();
 const socket = require('socket.io');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const corsConfig = {
@@ -13,7 +15,20 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.use(express.json());
 
+mongoose
+  .connect(process.env.MONGO_HOST, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.log(err.message);
+  });
+
 app.use('/api/messages', messageRoutes);
+app.use('/api/user', userRoutes);
 
 const server = app.listen(process.env.PORT, () => console.log(`Server started on ${process.env.PORT}`));
 const io = socket(server, {

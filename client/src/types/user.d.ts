@@ -1,4 +1,5 @@
 interface IUser {
+  _id: string;
   login: string;
   id: number;
   node_id: string;
@@ -31,4 +32,11 @@ interface IUser {
   following: number;
   created_at: string;
   updated_at: string;
+}
+
+interface MongoUser {
+  _id: string;
+  avatar_url: string;
+  username: string;
+  name?: string;
 }
