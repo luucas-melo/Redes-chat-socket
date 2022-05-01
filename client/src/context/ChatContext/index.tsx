@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Session } from 'next-auth';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { getCurrentChatMessages } from '../../services/messageServices';
 
 export type ChatContextType = {
   chat: IChat[];
@@ -27,10 +28,14 @@ interface ChartProviderProps {
   children: JSX.Element;
   session: Session;
 }
-export const ChartProvider = ({ children }: ChartProviderProps) => {
+export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
   const [chat, setChat] = useState<IChat[]>([]);
   const [currentChat, setCurrentChat] = useState<MongoUser | null>(null);
+
+  useEffect(() => {
+    if (currentChat) getCurrentChatMessages(session?.user?._id, currentChat?._id).then((data) => setChat(data.data));
+  }, [currentChat, session?.user?._id]);
 
   const values = useMemo(
     () => ({

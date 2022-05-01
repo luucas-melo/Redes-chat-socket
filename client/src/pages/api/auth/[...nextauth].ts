@@ -22,7 +22,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
 
             const response = await githubApi.get<IUser>(`/users/${credentials?.username.toLocaleLowerCase()}`);
 
-            const userResponse = await api.post<{ user: MongoUser }>('/user/save', {
+            const userResponse = await api.post<{ user: MongoUser }>('/users/save', {
               username: credentials?.username,
               avatar_url: response.data.avatar_url,
               name: response.data.name,

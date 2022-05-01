@@ -52,8 +52,9 @@ export const Chat = ({ session }: { session: Session }) => {
         setChat([...chat]);
       });
     }
-  }, []);
+  }, [chat, setChat]);
 
+  console.log('CHA', chat);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Flex flexDirection="column" background="gray.50" maxH="100vh" height="calc(100% - 40px)" overflowY="scroll">
@@ -62,7 +63,7 @@ export const Chat = ({ session }: { session: Session }) => {
             <Flex borderBottomWidth="1px" padding={4} alignItems="center" gap="1rem" cursor="pointer">
               <Avatar name="usuário logado" src={currentChat?.avatar_url} />
               <Flex flexDirection="column">
-                <Text fontWeight="semibold">{currentChat?._id}</Text>
+                <Text fontWeight="semibold">{currentChat?.username}</Text>
                 <Text fontSize="small" fontWeight="light">
                   status
                 </Text>
@@ -70,25 +71,27 @@ export const Chat = ({ session }: { session: Session }) => {
             </Flex>
           </>
         )}
-        {chat.map((chatData, index) => {
-          console.log(session?.user?._id, chatData);
+        {chat.length > 0
+          ? chat.map((chatData, index) => {
+              console.log('USER', session?.user?._id, chatData?.from);
 
-          return (
-            <Flex flexDirection="column" key={index} padding="10" paddingTop="0">
-              <Flex flexDirection="column" marginLeft={session?.user?._id === chatData.from ? 'auto' : '0'}>
-                <Text
-                  minWidth="50px"
-                  bg={session?.user?._id === chatData.from ? 'whatsapp.100' : 'white'}
-                  width="fit-content"
-                  borderRadius="md"
-                  padding="1"
-                >
-                  {chatData.message}
-                </Text>
-              </Flex>
-            </Flex>
-          );
-        })}
+              return (
+                <Flex flexDirection="column" key={index} padding="10" paddingTop="0">
+                  <Flex flexDirection="column" marginLeft={session?.user?._id === chatData.from ? 'auto' : '0'}>
+                    <Text
+                      minWidth="50px"
+                      bg={session?.user?._id === chatData.from ? 'whatsapp.100' : 'white'}
+                      width="fit-content"
+                      borderRadius="md"
+                      padding="1"
+                    >
+                      {chatData.message}
+                    </Text>
+                  </Flex>
+                </Flex>
+              );
+            })
+          : null}
         <Flex position="fixed" bottom="0" width="100%">
           <Input
             autoComplete="off"
