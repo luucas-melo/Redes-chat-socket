@@ -21,4 +21,15 @@ module.exports = {
       next(error);
     }
   },
+  async getUsers(req, res, next) {
+    try {
+      console.log(req.query);
+      const { id } = req.query;
+      console.log(id);
+      const users = (await Users.find({ _id: { $ne: id } })) || [];
+      return res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
