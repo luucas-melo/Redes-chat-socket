@@ -28,7 +28,7 @@ mongoose
   });
 
 app.use('/api/messages', messageRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 
 const server = app.listen(process.env.PORT, () => console.log(`Server started on ${process.env.PORT}`));
 const io = socket(server, {

@@ -1,6 +1,7 @@
-const { addMessage } = require('../controllers/messageController');
+const { addMessage, getPrivateMessages } = require('../controllers/messageController');
 const router = require('express').Router();
 
-router.post('/add-new-message', addMessage);
+router.post('/addNewMessage', addMessage);
+router.get('/getPrivateMessages', getPrivateMessages);
 
 module.exports = router;
