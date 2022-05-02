@@ -12,10 +12,23 @@ export const addNewMessage = async (message: IChat) => {
   }
 };
 
-export const getCurrentChatMessages = async (from: string, to: string): Promise<AxiosResponse<IChat[], any>> => {
+export const getMessages = async (from: string, to: string, isPrivate = true): Promise<AxiosResponse<IChat[], any>> => {
   try {
-    const response = await api.get<IChat[]>('/messages/getPrivateMessages', {
-      params: { from, to },
+    const response = await api.get<IChat[]>('/messages/getMessages', {
+      params: { from, to, isPrivate },
+    });
+
+    return response;
+  } catch (error) {
+    console.log(error);
+    return error as AxiosResponse;
+  }
+};
+
+export const getGroupsMessages = async (id: string, userId: string): Promise<AxiosResponse<IChat[], any>> => {
+  try {
+    const response = await api.get<IChat[]>('/messages/getMessages', {
+      params: { id, userId },
     });
 
     return response;

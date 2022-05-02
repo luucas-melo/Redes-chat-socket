@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Session } from 'next-auth';
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getCurrentChatMessages } from '../../services/messageServices';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { IGroup } from '../../services/groupServices';
+import { getMessages } from '../../services/messageServices';
 
 export type ChatContextType = {
   chat: IChat[];
-  currentChat: MongoUser | null;
-  setCurrentChat: React.Dispatch<React.SetStateAction<MongoUser | null>>;
+  currentChat: MongoUser | IGroup | null;
+  setCurrentChat: React.Dispatch<React.SetStateAction<MongoUser | IGroup | null>>;
   setChat: React.Dispatch<React.SetStateAction<IChat[]>>;
   connected: boolean;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
+  socket?: React.MutableRefObject<undefined>;
 };
 
 export const ChatContextDefaultValues: ChatContextType = {
@@ -31,11 +33,17 @@ interface ChartProviderProps {
 export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
   const [chat, setChat] = useState<IChat[]>([]);
-  const [currentChat, setCurrentChat] = useState<MongoUser | null>(null);
+  const [currentChat, setCurrentChat] = useState<MongoUser | IGroup | null>(null);
 
   useEffect(() => {
-    if (currentChat) getCurrentChatMessages(session?.user?._id, currentChat?._id).then((data) => setChat(data.data));
+    console.log('TESTANDO', currentChat);
+    if (!currentChat?._id && !session?.user?._id) return;
+    getMessages(session?.user?._id, currentChat?._id as string, currentChat?.isPrivate).then((data) =>
+      setChat(data.data)
+    );
   }, [currentChat, session?.user?._id]);
+
+  const socket = useRef();
 
   const values = useMemo(
     () => ({
@@ -45,8 +53,9 @@ export const ChartProvider = ({ children, session }: ChartProviderProps) => {
       currentChat,
       setCurrentChat,
       setChat,
+      socket,
     }),
-    [connected, chat, currentChat, setCurrentChat, setChat, setConnected]
+    [connected, chat, currentChat, setCurrentChat, setChat, setConnected, socket]
   );
 
   return <ChatContext.Provider value={values}>{children}</ChatContext.Provider>;

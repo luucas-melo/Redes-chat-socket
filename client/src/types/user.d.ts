@@ -39,4 +39,5 @@ interface MongoUser {
   avatar_url: string;
   username: string;
   name?: string;
+  isPrivate?: boolean;
 }
