@@ -36,7 +36,7 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
       console.log('KDAS', currentChat?._id);
     }
   }, [currentChat]);
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(true);
   const { handleSubmit, register } = useForm<FormValues>();
   const { handleSubmit: handleSubmitFriend, register: registerFriend } = useForm<AddFriendFormValues>();
 
@@ -66,16 +66,20 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
     }
   };
 
-  const handleClickUser = (user: MongoUser) => {
+  const handleClick = (user: MongoUser) => {
+    console.log('USUARIO', user);
+    // console.log('GROU', group.users);
+    // const users = group.users.map((user) => user._id);
+
+    // console.log(users);
     if (isCreatingGroup) {
-      groupMembers.push(user._id);
-      setGroupMembers([...groupMembers]);
+      setGroupMembers([...groupMembers, user._id]);
       return;
     }
-    setCurrentChat(user);
+    // setCurrentChat(group);
   };
 
-  console.log(groups);
+  console.log('MEMBER', groupMembers);
   return (
     <Flex width="100%" flexDirection="column" overflowY="scroll">
       <Flex
@@ -113,7 +117,7 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
               gap="1rem"
               cursor="pointer"
               _hover={{ backgroundColor: 'gray.100' }}
-              onClick={() => handleClickUser(user)}
+              onClick={() => handleClick(user)}
               backgroundColor={isCreatingGroup && groupMembers.includes(user._id) ? 'gray.100' : 'white'}
             >
               <Avatar name="user" src={user?.avatar_url} />
@@ -139,20 +143,20 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
                 gap="1rem"
                 cursor="pointer"
                 _hover={{ backgroundColor: 'gray.100' }}
-                backgroundColor={isCreatingGroup && groupMembers.includes(group._id) ? 'gray.100' : 'white'}
+                backgroundColor={isCreatingGroup && groupMembers.includes(user?._id as string) ? 'gray.100' : 'white'}
                 onClick={() => {
                   if (group.is_private) {
                     group.avatar_url = user?.avatar_url;
                     group.name = user?.username as string;
                   }
-                  handleClickUser(group);
+                  handleClick(user as MongoUser);
 
                   setCurrentChat(group);
                 }}
               >
-                <Avatar name="Group" src={user?.avatar_url} />
+                <Avatar name="Group" src={group.is_private ? user?.avatar_url : ''} />
                 <Flex flexDirection="column">
-                  <Text fontWeight="semibold">{user?.username}</Text>
+                  <Text fontWeight="semibold">{group.is_private ? user?.username : group?.name}</Text>
                   <Text fontSize="small" fontWeight="light">
                     Ultima mensagem
                   </Text>
@@ -164,9 +168,6 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
       <form onSubmit={handleSubmitFriend(onSubmitFriend)}>
         <Flex flexDirection="column" padding="10" gap="1rem">
           <Select placeholder="Adicionar amigo" {...registerFriend('userId')}>
-            {/* <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option> */}
             {users?.map((user, index) => (
               <option value={user?._id} key={index}>
                 {user?.username}
