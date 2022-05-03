@@ -1,5 +1,5 @@
 interface IChat {
-  to: string;
-  from: string;
+  to: MongoUser;
+  from: MongoUser;
   message: string;
 }

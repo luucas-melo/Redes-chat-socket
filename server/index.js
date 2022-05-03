@@ -6,6 +6,7 @@ const groupRoutes = require('./routes/group');
 const app = express();
 const socket = require('socket.io');
 const mongoose = require('mongoose');
+const Groups = require('./models/Groups');
 require('dotenv').config();
 
 const corsConfig = {
@@ -37,34 +38,22 @@ const io = socket(server, {
   cors: corsConfig,
 });
 
-global.onlineUsers = new Map();
 global.groups = new Map();
+global.onlineUsers = new Map();
 io.on('connection', (socket) => {
-  global.chatSocket = socket;
   socket.on('ADD_USER', (userId) => {
     onlineUsers.set(userId, socket.id);
   });
 
-  socket.on('SEND_MSG', (group, data) => {
-    if (group) {
-      console.log('SEND SUCE', groups, data);
-      socket.to(group).emit('RECEIVE_MSG', data);
-    }
+  socket.on('SEND_MSG', (group, data, sender) => {
+    socket.to(group).emit('RECEIVE_MSG', data);
   });
-
   socket.on('ADD_GROUP', (groupId) => {
     groups.set(groupId, socket.id);
-    console.log('JOVO S GRI', groups);
     socket.join(groupId);
-    console.log('GROUPID', groups, groupId);
   });
 
-  socket.on('SEND_GROUP_MESSAGE', (data) => {
-    const groupSocket = groups.get(data.to);
-    console.log('GRUPO', groupSocket);
-    console.log('DATA', data);
-    if (groupSocket) {
-      socket.to(groupSocket).emit('RECEIVE_MSG', data);
-    }
+  socket.on('LEAVE_GROUP', (groupId) => {
+    socket.leave(groupId);
   });
 });

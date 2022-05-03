@@ -13,20 +13,20 @@ export const Chat = ({ session }: { session: Session }) => {
   const { chat, connected, setConnected, setChat, currentChat, socket } = useChat();
   const [messageReceived, setMessageReceived] = useState<IChat>();
   const onSubmit = async (data: IMessage) => {
-    if (!currentChat) return;
+    if (!currentChat || !socket) return;
     try {
       const messageObject = {
         message: data.message,
         from: session?.user,
         to: currentChat?._id,
         isPrivate: currentChat?.isPrivate,
-      };
-      socket.current.emit('SEND_MSG', currentChat._id, messageObject);
+      } as unknown as IChat;
+      socket.current.emit('SEND_MSG', currentChat._id, messageObject, session?.user._id);
 
       const response = await addNewMessage(messageObject);
 
-      chat.push(messageObject);
-      setChat([...chat]);
+      //   chat.push(messageObject);
+      //   setChat([...chat]);
       return response?.data;
     } catch (error) {
       console.log(error);
@@ -36,17 +36,17 @@ export const Chat = ({ session }: { session: Session }) => {
   };
 
   useEffect(() => {
-    if (session?.user?._id) {
+    if (session?.user?._id && socket) {
       socket.current = io('http://localhost:5000');
       socket.current.emit('ADD_USER', session?.user?._id);
       setConnected(true);
     }
-  }, [session?.user?._id, setConnected]);
+  }, [session?.user?._id]);
 
   useEffect(() => {
-    if (socket.current) {
+    if (socket?.current) {
       socket.current.on('RECEIVE_MSG', (msg: IChat) => {
-        console.log('M,AIS', chat, msg);
+        console.log('RECEBEU', msg);
         setMessageReceived(msg);
       });
     }
@@ -56,9 +56,6 @@ export const Chat = ({ session }: { session: Session }) => {
     messageReceived && setChat((prev) => [...prev, messageReceived]);
   }, [messageReceived]);
 
-  useEffect(() => {
-    console.log('O CHAT', chat);
-  }, [chat]);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Flex flexDirection="column" background="gray.50" maxH="100vh" height="calc(100% - 40px)" overflowY="scroll">

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { createGroup, IGroup } from '../../services/groupServices';
 import { toast } from 'react-toastify';
+import { AiOutlineCheckCircle } from 'react-icons/ai';
 interface SidebarProps {
   session: Session;
   users: MongoUser[];
@@ -36,12 +37,11 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
       console.log('KDAS', currentChat?._id);
     }
   }, [currentChat]);
-  const [isCreatingGroup, setIsCreatingGroup] = useState(true);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const { handleSubmit, register } = useForm<FormValues>();
   const { handleSubmit: handleSubmitFriend, register: registerFriend } = useForm<AddFriendFormValues>();
 
   const onSubmit = async (data: FormValues) => {
-    // build message obj
     try {
       const response = await createGroup([...groupMembers, session?.user?._id], data.groupName, false);
       socket?.current.emit('ADD_GROUP', response.data.group._id);
@@ -51,9 +51,7 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
     }
   };
   const onSubmitFriend = async (data: AddFriendFormValues) => {
-    // build message obj
     try {
-      console.log(data);
       const response = await createGroup(
         [data.userId, session?.user?._id],
         data.userId + '-' + session?.user?._id,
@@ -67,19 +65,13 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
   };
 
   const handleClick = (user: MongoUser) => {
-    console.log('USUARIO', user);
-    // console.log('GROU', group.users);
-    // const users = group.users.map((user) => user._id);
-
-    // console.log(users);
-    if (isCreatingGroup) {
+    if (groupMembers.includes(user._id)) {
+      setGroupMembers(groupMembers.filter((member) => member !== user._id));
+    } else {
       setGroupMembers([...groupMembers, user._id]);
-      return;
     }
-    // setCurrentChat(group);
   };
 
-  console.log('MEMBER', groupMembers);
   return (
     <Flex width="100%" flexDirection="column" overflowY="scroll">
       <Flex
@@ -90,7 +82,9 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
         cursor="pointer"
         bg="gray.100"
         justifyContent="space-between"
+        width="100%"
       >
+        {/* <Button onClick={() => socket?.current.emit('LEAVE_GROUP', session?.user?._id, currentChat?._id)}>leva</Button> */}
         <Avatar name="following user" src={session?.user?.avatar_url} />
         <Menu>
           <MenuButton>
@@ -101,38 +95,17 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
           </MenuList>
         </Menu>
       </Flex>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Flex flexDirection="column" padding="10" gap="1rem">
-          <Input {...register('groupName')} placeholder="Nome do grupo" _placeholder={{ color: 'inherit' }} />
-          <Button type="submit">Criar</Button>
-        </Flex>
-      </form>
-      {/* {users?.length
-        ? users.map((user, index) => (
-            <Flex
-              key={index}
-              borderBottomWidth="1px"
-              padding={4}
-              alignItems="center"
-              gap="1rem"
-              cursor="pointer"
-              _hover={{ backgroundColor: 'gray.100' }}
-              onClick={() => handleClick(user)}
-              backgroundColor={isCreatingGroup && groupMembers.includes(user._id) ? 'gray.100' : 'white'}
-            >
-              <Avatar name="user" src={user?.avatar_url} />
-              <Flex flexDirection="column">
-                <Text fontWeight="semibold">{user?.username}</Text>
-                <Text fontSize="small" fontWeight="light">
-                  Ultima mensagem
-                </Text>
-              </Flex>
-            </Flex>
-          ))
-        : null} */}
+      {isCreatingGroup ? (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Flex flexDirection="column" padding="10" gap="1rem">
+            <Input {...register('groupName')} placeholder="Nome do grupo" _placeholder={{ color: 'inherit' }} />
+            <Button type="submit">Criar</Button>
+          </Flex>
+        </form>
+      ) : null}
+      {isCreatingGroup && <Text fontWeight="medium">Selecionar membros:</Text>}
       {groups?.length
         ? groups.map((group, index) => {
-            console.log(group);
             const user = group.users.find((user) => user._id !== session?.user?._id);
             return (
               <Flex
@@ -140,27 +113,39 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
                 borderBottomWidth="1px"
                 padding={4}
                 alignItems="center"
-                gap="1rem"
+                justifyContent="space-between"
                 cursor="pointer"
                 _hover={{ backgroundColor: 'gray.100' }}
-                backgroundColor={isCreatingGroup && groupMembers.includes(user?._id as string) ? 'gray.100' : 'white'}
+                backgroundColor={
+                  isCreatingGroup && group.is_private && groupMembers.includes(user?._id as string)
+                    ? 'gray.100'
+                    : 'white'
+                }
                 onClick={() => {
                   if (group.is_private) {
                     group.avatar_url = user?.avatar_url;
                     group.name = user?.username as string;
+                    if (isCreatingGroup) {
+                      handleClick(user as MongoUser);
+                    }
                   }
-                  handleClick(user as MongoUser);
-
-                  setCurrentChat(group);
+                  if (!isCreatingGroup) setCurrentChat(group);
                 }}
               >
-                <Avatar name="Group" src={group.is_private ? user?.avatar_url : ''} />
-                <Flex flexDirection="column">
-                  <Text fontWeight="semibold">{group.is_private ? user?.username : group?.name}</Text>
-                  <Text fontSize="small" fontWeight="light">
-                    Ultima mensagem
-                  </Text>
+                <Flex gap="1rem">
+                  <Avatar name="Group" src={group.is_private ? user?.avatar_url : ''} />
+                  <Flex flexDirection="column">
+                    <Text fontWeight="semibold">{group.is_private ? user?.username : group?.name}</Text>
+                    <Text fontSize="small" fontWeight="light">
+                      Ultima mensagem
+                    </Text>
+                  </Flex>
                 </Flex>
+                {isCreatingGroup && group.is_private && groupMembers.includes(user?._id as string) ? (
+                  <Flex justifyContent="flex-end">
+                    <AiOutlineCheckCircle fill="green" />
+                  </Flex>
+                ) : null}
               </Flex>
             );
           })

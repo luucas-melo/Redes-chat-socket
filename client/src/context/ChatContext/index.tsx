@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Session } from 'next-auth';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Socket } from 'socket.io-client';
 import { IGroup } from '../../services/groupServices';
 import { getMessages } from '../../services/messageServices';
 
@@ -11,7 +12,7 @@ export type ChatContextType = {
   setChat: React.Dispatch<React.SetStateAction<IChat[]>>;
   connected: boolean;
   setConnected: React.Dispatch<React.SetStateAction<boolean>>;
-  socket?: React.MutableRefObject<undefined>;
+  socket?: React.MutableRefObject<Socket>;
 };
 
 export const ChatContextDefaultValues: ChatContextType = {
@@ -32,8 +33,10 @@ interface ChartProviderProps {
 }
 export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
-  const [chat, setChat] = useState<IChat[]>();
+  const [chat, setChat] = useState<IChat[]>([]);
   const [currentChat, setCurrentChat] = useState<MongoUser | IGroup | null>(null);
+
+  const socket = useRef<Socket>(null);
 
   useEffect(() => {
     console.log('TESTANDO', currentChat);
@@ -44,13 +47,11 @@ export const ChartProvider = ({ children, session }: ChartProviderProps) => {
           from: message.sender,
           message: message.message.text,
         };
-      });
+      }) as unknown as IChat[];
       console.log('MESSAGES', messages);
       setChat(messages);
     });
   }, [currentChat, session?.user?._id]);
-
-  const socket = useRef();
 
   const values = useMemo(
     () => ({

@@ -1,11 +1,10 @@
 import { AxiosResponse } from 'axios';
 import { api } from './api';
-import { IMessage } from './usersServices';
 
 export interface IGroup {
   _id: string;
   users: MongoUser[];
-  messages: IMessage[];
+  messages: { sender: string; message: { text: string } }[];
   name: string;
   isPrivate?: boolean;
   is_private?: boolean;
