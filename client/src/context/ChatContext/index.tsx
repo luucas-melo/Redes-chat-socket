@@ -39,7 +39,6 @@ export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const socket = useRef<Socket>(null);
 
   useEffect(() => {
-    console.log('TESTANDO', currentChat);
     if (!currentChat?._id || !session?.user?._id) return;
     getMessages(session?.user?._id, currentChat?._id as string).then((data) => {
       const messages = data?.data?.messages.map((message) => {
@@ -48,7 +47,6 @@ export const ChartProvider = ({ children, session }: ChartProviderProps) => {
           message: message.message.text,
         };
       }) as unknown as IChat[];
-      console.log('MESSAGES', messages);
       setChat(messages);
     });
   }, [currentChat, session?.user?._id]);

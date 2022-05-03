@@ -1,6 +1,6 @@
 import { Avatar, Flex, Input, Text } from '@chakra-ui/react';
 import { Session } from 'next-auth';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { io } from 'socket.io-client';
 import { useChat } from '../../context/ChatContext';
@@ -12,6 +12,8 @@ export const Chat = ({ session }: { session: Session }) => {
 
   const { chat, connected, setConnected, setChat, currentChat, socket } = useChat();
   const [messageReceived, setMessageReceived] = useState<IChat>();
+  const messageEndRef = useRef<HTMLDivElement>();
+
   const onSubmit = async (data: IMessage) => {
     if (!currentChat || !socket) return;
     try {
@@ -55,6 +57,11 @@ export const Chat = ({ session }: { session: Session }) => {
   useEffect(() => {
     messageReceived && setChat((prev) => [...prev, messageReceived]);
   }, [messageReceived]);
+
+  // rolar para ultima mensagem
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chat]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -105,6 +112,7 @@ export const Chat = ({ session }: { session: Session }) => {
               );
             })
           : null}
+        <div ref={messageEndRef} />
         <Flex position="fixed" bottom="0" width="100%">
           <Input
             autoComplete="off"
