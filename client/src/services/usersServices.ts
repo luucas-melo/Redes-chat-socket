@@ -7,6 +7,7 @@ export interface IMessage {
   message: string;
 }
 
+// pega todos os usuários do banco, exceto o usuário logado
 export const getUsers = async (currentUserId: string): Promise<AxiosResponse<MongoUser[], any>> => {
   try {
     const response = await api.get<MongoUser[]>('/users/getUsers', { params: { id: currentUserId } });

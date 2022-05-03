@@ -5,7 +5,6 @@ import {
   FormErrorMessage,
   FormHelperText,
   FormLabel,
-  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
@@ -28,7 +27,7 @@ export const SignInForm = () => {
         callbackUrl: '/chat',
       });
 
-      if (response.ok) {
+      if (response?.ok) {
         toast.success('Seja bem vindo');
       } else {
         setIsInvalid(false);
@@ -41,10 +40,6 @@ export const SignInForm = () => {
     <Flex bg="gray.300" width="100%" height="100vh" alignItems="center" justifyContent="center">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Flex flexDirection="column" background="white" borderRadius="10px" gap={4} padding={10} boxShadow="base">
-          {/* <Flex flexDirection="column" boxShadow="base" width="400px" padding="10" gap="1rem">
-            <Input {...register('username')} placeholder="Username" _placeholder={{ color: 'inherit' }} />
-            <Button type="submit">Entrar</Button>
-          </Flex> */}
           <FormControl maxW="600px" isInvalid={isInvalid} margin="0 auto">
             <FormLabel htmlFor="email">Usuário do github</FormLabel>
             <InputGroup>

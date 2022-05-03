@@ -23,6 +23,7 @@ export const Chat = ({ session }: { session: Session }) => {
         to: currentChat?._id,
         isPrivate: currentChat?.isPrivate,
       } as unknown as IChat;
+      // envia mensagem para o socket do lado do servidor
       socket.current.emit('SEND_MSG', currentChat._id, messageObject, session?.user._id);
 
       const response = await addNewMessage(messageObject);
@@ -40,6 +41,7 @@ export const Chat = ({ session }: { session: Session }) => {
   useEffect(() => {
     if (session?.user?._id && socket) {
       socket.current = io('http://localhost:5000');
+      // conecta o usuario no Map de sockets do lado do servidor
       socket.current.emit('ADD_USER', session?.user?._id);
       setConnected(true);
     }
@@ -47,13 +49,14 @@ export const Chat = ({ session }: { session: Session }) => {
 
   useEffect(() => {
     if (socket?.current) {
+      // escuta o evento de receber mensagem e caso receba adiciona na lista de mensagem recebida
       socket.current.on('RECEIVE_MSG', (msg: IChat) => {
-        console.log('RECEBEU', msg);
         setMessageReceived(msg);
       });
     }
   }, []);
 
+  // adiciona mensagem ao chat sempre que recebe uma mensagem do socket
   useEffect(() => {
     messageReceived && setChat((prev) => [...prev, messageReceived]);
   }, [messageReceived]);

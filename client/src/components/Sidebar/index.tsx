@@ -25,7 +25,7 @@ export const Sidebar = ({ session }: SidebarProps) => {
     userId: string;
   }
 
-  const { data: users, mutateFriend } = useRequest<IGroup[], string>({
+  const { data: users, mutate: mutateFriend } = useRequest<IGroup[], string>({
     method: 'GET',
     url: '/users/getUsers',
     params: { id: session?.user?._id },
@@ -38,6 +38,7 @@ export const Sidebar = ({ session }: SidebarProps) => {
 
   useEffect(() => {
     if (socket?.current) {
+      // loop para adicionar ao socket todos os grupos que o usuário está
       groups?.forEach((group) => {
         socket?.current.emit('ADD_GROUP', group._id);
       });
@@ -50,7 +51,9 @@ export const Sidebar = ({ session }: SidebarProps) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // cria o grupo
       const response = await createGroup([...groupMembers, session?.user?._id], data.groupName, false);
+      // adiciona o grupo ao socket
       socket?.current.emit('ADD_GROUP', response.data.group._id);
       toast.success('Grupo criado com sucesso');
     } catch (error) {
@@ -66,6 +69,7 @@ export const Sidebar = ({ session }: SidebarProps) => {
         data.userId + '-' + session?.user?._id,
         true
       );
+      // adiciona o grupo entre 2 pessoas ao socket
       socket?.current.emit('ADD_GROUP', response.data.group._id);
       await mutate();
       await mutateFriend();

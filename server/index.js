@@ -50,6 +50,7 @@ io.on('connection', (socket) => {
   });
   socket.on('ADD_GROUP', (groupId) => {
     groups.set(groupId, socket.id);
+    // entra em uma sala(room) https://socket.io/docs/v4/rooms/
     socket.join(groupId);
   });
 

@@ -13,6 +13,7 @@ export interface IGroup {
 interface CreateGroupResponse {
   group: IGroup;
 }
+// cria um grupo com os membros passados
 export const createGroup = async (
   groupMembers: string[],
   name: string,
@@ -28,6 +29,7 @@ export const createGroup = async (
   }
 };
 
+// pega todos os grupos que o usuário logado participa
 export const getGroups = async (userId: string): Promise<AxiosResponse<CreateGroupResponse, any>> => {
   try {
     const response = await api.get('/groups/getGroups', { params: { id: userId } });
