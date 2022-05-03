@@ -72,7 +72,6 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
       setGroupMembers([...groupMembers]);
       return;
     }
-    user.isPrivate = true;
     setCurrentChat(user);
   };
 

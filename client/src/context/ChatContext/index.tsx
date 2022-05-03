@@ -32,15 +32,22 @@ interface ChartProviderProps {
 }
 export const ChartProvider = ({ children, session }: ChartProviderProps) => {
   const [connected, setConnected] = useState(false);
-  const [chat, setChat] = useState<IChat[]>([]);
+  const [chat, setChat] = useState<IChat[]>();
   const [currentChat, setCurrentChat] = useState<MongoUser | IGroup | null>(null);
 
   useEffect(() => {
     console.log('TESTANDO', currentChat);
-    if (!currentChat?._id && !session?.user?._id) return;
-    getMessages(session?.user?._id, currentChat?._id as string, currentChat?.isPrivate).then((data) =>
-      setChat(data.data)
-    );
+    if (!currentChat?._id || !session?.user?._id) return;
+    getMessages(session?.user?._id, currentChat?._id as string).then((data) => {
+      const messages = data?.data?.messages.map((message) => {
+        return {
+          from: message.sender,
+          message: message.message.text,
+        };
+      });
+      console.log('MESSAGES', messages);
+      setChat(messages);
+    });
   }, [currentChat, session?.user?._id]);
 
   const socket = useRef();
