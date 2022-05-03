@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     onlineUsers.set(userId, socket.id);
   });
 
-  socket.on('SEND_MSG', (group, data, sender) => {
+  socket.on('SEND_MSG', (group, data) => {
     socket.to(group).emit('RECEIVE_MSG', data);
   });
   socket.on('ADD_GROUP', (groupId) => {

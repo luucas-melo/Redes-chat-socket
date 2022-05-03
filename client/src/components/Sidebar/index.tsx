@@ -7,13 +7,14 @@ import { useForm } from 'react-hook-form';
 import { createGroup, IGroup } from '../../services/groupServices';
 import { toast } from 'react-toastify';
 import { AiOutlineCheckCircle } from 'react-icons/ai';
+import { useRequest } from '../../hooks/useRequest';
 interface SidebarProps {
   session: Session;
   users: MongoUser[];
   groups: IGroup[];
 }
-export const Sidebar = ({ session, users, groups }: SidebarProps) => {
-  const { setCurrentChat, socket, currentChat } = useChat();
+export const Sidebar = ({ session }: SidebarProps) => {
+  const { setCurrentChat, socket } = useChat();
   const [groupMembers, setGroupMembers] = useState<MongoUser['_id'][]>([]);
 
   interface FormValues {
@@ -24,19 +25,25 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
     userId: string;
   }
 
+  const { data: users, mutateFriend } = useRequest<IGroup[], string>({
+    method: 'GET',
+    url: '/users/getUsers',
+    params: { id: session?.user?._id },
+  });
+  const { data: groups, mutate } = useRequest<IGroup[], string>({
+    method: 'GET',
+    url: '/groups/getGroups',
+    params: { id: session?.user?._id },
+  });
+
   useEffect(() => {
     if (socket?.current) {
-      groups.forEach((group) => {
+      groups?.forEach((group) => {
         socket?.current.emit('ADD_GROUP', group._id);
       });
     }
   }, [groups, socket]);
 
-  useEffect(() => {
-    if (socket?.current) {
-      console.log('KDAS', currentChat?._id);
-    }
-  }, [currentChat]);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const { handleSubmit, register } = useForm<FormValues>();
   const { handleSubmit: handleSubmitFriend, register: registerFriend } = useForm<AddFriendFormValues>();
@@ -48,6 +55,8 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
       toast.success('Grupo criado com sucesso');
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsCreatingGroup(false);
     }
   };
   const onSubmitFriend = async (data: AddFriendFormValues) => {
@@ -58,6 +67,8 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
         true
       );
       socket?.current.emit('ADD_GROUP', response.data.group._id);
+      await mutate();
+      await mutateFriend();
       toast.success('Amigo adicionado com sucesso');
     } catch (error) {
       console.log(error);
@@ -99,7 +110,9 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex flexDirection="column" padding="10" gap="1rem">
             <Input {...register('groupName')} placeholder="Nome do grupo" _placeholder={{ color: 'inherit' }} />
-            <Button type="submit">Criar</Button>
+            <Button bg="whatsapp.300" color="white" _hover={{ bg: 'whatsapp.200' }} type="submit">
+              Criar grupo
+            </Button>
           </Flex>
         </form>
       ) : null}
@@ -150,18 +163,20 @@ export const Sidebar = ({ session, users, groups }: SidebarProps) => {
             );
           })
         : null}
-      <form onSubmit={handleSubmitFriend(onSubmitFriend)}>
-        <Flex flexDirection="column" padding="10" gap="1rem">
-          <Select placeholder="Adicionar amigo" {...registerFriend('userId')}>
-            {users?.map((user, index) => (
-              <option value={user?._id} key={index}>
-                {user?.username}
-              </option>
-            ))}
-          </Select>
-          <Button type="submit">Adicionar</Button>
-        </Flex>
-      </form>
+      {!isCreatingGroup ? (
+        <form onSubmit={handleSubmitFriend(onSubmitFriend)}>
+          <Flex flexDirection="column" padding="10" gap="1rem">
+            <Select placeholder="Adicionar amigo" {...registerFriend('userId')}>
+              {users?.map((user, index) => (
+                <option value={user?._id} key={index}>
+                  {user?.username}
+                </option>
+              ))}
+            </Select>
+            <Button type="submit">Adicionar</Button>
+          </Flex>
+        </form>
+      ) : null}
     </Flex>
   );
 };

@@ -27,8 +27,8 @@ export const Chat = ({ session }: { session: Session }) => {
 
       const response = await addNewMessage(messageObject);
 
-      //   chat.push(messageObject);
-      //   setChat([...chat]);
+      chat.push(messageObject);
+      setChat([...chat]);
       return response?.data;
     } catch (error) {
       console.log(error);

@@ -10,6 +10,7 @@ import { IGroup, getGroups } from '../services/groupServices';
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
     const session = await getSession(context);
+
     if (!session)
       return {
         props: { session: null },
