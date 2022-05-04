@@ -1,4 +1,4 @@
-import { Avatar, Button, Flex, Input, Menu, MenuButton, MenuItem, MenuList, Select, Text } from '@chakra-ui/react';
+import { Avatar, Box, Button, Flex, Input, Menu, MenuButton, MenuItem, MenuList, Select, Text } from '@chakra-ui/react';
 import { Session } from 'next-auth';
 import { useChat } from '../../context/ChatContext';
 import { BsThreeDotsVertical } from 'react-icons/bs';
@@ -110,17 +110,18 @@ export const Sidebar = ({ session }: SidebarProps) => {
           </MenuList>
         </Menu>
       </Flex>
-      {isCreatingGroup ? (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex flexDirection="column" padding="10" gap="1rem">
+      {isCreatingGroup && (
+        <Box marginTop="2rem" marginBottom="2rem" padding={4}>
+          <form onSubmit={handleSubmit(onSubmit)} id="form-id">
             <Input {...register('groupName')} placeholder="Nome do grupo" _placeholder={{ color: 'inherit' }} />
-            <Button bg="whatsapp.300" color="white" _hover={{ bg: 'whatsapp.200' }} type="submit">
-              Criar grupo
-            </Button>
-          </Flex>
-        </form>
-      ) : null}
-      {isCreatingGroup && <Text fontWeight="medium">Selecionar membros:</Text>}
+          </form>
+        </Box>
+      )}
+      {isCreatingGroup && (
+        <Text padding={4} fontWeight="medium">
+          Selecionar membros:
+        </Text>
+      )}
       {groups?.length
         ? groups.map((group, index) => {
             const user = group.users.find((user) => user._id !== session?.user?._id);
@@ -167,6 +168,29 @@ export const Sidebar = ({ session }: SidebarProps) => {
             );
           })
         : null}
+      {isCreatingGroup ? (
+        <Flex marginTop="2rem" width="100%" padding={4} gap={2}>
+          <Button
+            width="100%"
+            bg="red.300"
+            color="white"
+            _hover={{ bg: 'red.100' }}
+            onClick={() => setIsCreatingGroup(false)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            width="100%"
+            bg="whatsapp.300"
+            color="white"
+            _hover={{ bg: 'whatsapp.200' }}
+            type="submit"
+            form="form-id"
+          >
+            Criar grupo
+          </Button>
+        </Flex>
+      ) : null}
       {!isCreatingGroup ? (
         <form onSubmit={handleSubmitFriend(onSubmitFriend)}>
           <Flex flexDirection="column" padding="10" gap="1rem">
