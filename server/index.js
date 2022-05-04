@@ -43,6 +43,13 @@ global.onlineUsers = new Map();
 io.on('connection', (socket) => {
   socket.on('ADD_USER', (userId) => {
     onlineUsers.set(userId, socket.id);
+    console.log(onlineUsers);
+
+    for (const [mongoId, socketId] of onlineUsers.entries()) {
+      if (mongoId !== userId) {
+        socket.to(socketId).emit('USER_CONNECTED', socketId);
+      }
+    }
   });
 
   socket.on('SEND_MSG', (group, data) => {

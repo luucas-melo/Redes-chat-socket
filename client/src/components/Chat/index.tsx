@@ -2,6 +2,7 @@ import { Avatar, Flex, Input, Text } from '@chakra-ui/react';
 import { Session } from 'next-auth';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import { useChat } from '../../context/ChatContext';
 import { IGroup } from '../../services/groupServices';
@@ -46,6 +47,14 @@ export const Chat = ({ session }: { session: Session }) => {
       setConnected(true);
     }
   }, [session?.user?._id]);
+
+  useEffect(() => {
+    if (socket?.current) {
+      socket.current.on('USER_CONNECTED', (user: string) => {
+        toast.info(`${user} connected`, { toastId: 'connected' });
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (socket?.current) {
